@@ -7,12 +7,11 @@ cout<<"Setting up hardware" <<endl;
   cout<< "Setting up Bios"<<endl;
   cout<<"preparing the kernel"<<endl<<".\n"<<".\n"<<".\n";
 
-  
 }
-
 
 int main() 
 {  
+  
 startingUp();
   cout<< "Operating system is ready to be used";
 
