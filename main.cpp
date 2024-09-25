@@ -1,6 +1,9 @@
 #include <iostream>
-
-int main() { std::cout << "Hello World!\n"; }
+using namespace std; 
+int main() 
+{  
 
 cout << "Hello Jorge";
 cout << "hello albert";
+cout << "Hello World";
+};
