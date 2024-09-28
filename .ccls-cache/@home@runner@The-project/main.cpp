@@ -108,7 +108,7 @@ int main()
 {  
   
 startingUp();
-  cout<< "Operating system is ready to be used\n";
+cout<< "Operating system is ready to be used\n";
 loginAuthentication();
 managingProcesses();
 
