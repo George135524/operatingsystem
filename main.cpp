@@ -11,7 +11,6 @@ using namespace std;
 
 int main() 
 {  
-  
 Displaybootup startup;
 Processing creation;
 startup.startingUp();

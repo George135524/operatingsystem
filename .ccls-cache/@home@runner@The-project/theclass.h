@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 using namespace std;
 class Displaybootup
 {
@@ -35,6 +36,7 @@ string password;
 
 class Processing {
 public:
+string word;
 const int maxProcesses = 10;
 void create(string processes[], int& processCount){
   string processName;
@@ -95,20 +97,21 @@ void managingProcesses()
     cout << "3. Exit\n";
     cout << "Enter your choice: ";
     cin >> choice;
+    
 
-    switch(choice){
-      case 1:
-        create(process, processCount);
-        break;
-      case 2:
-        terminate(process, processCount);
-        break;
-      case 3:
-        cout << "Exiting the program.\n";
-        break;
-      default:
-        cout << "Invalid choice. Please try again.\n";
-    }
-  }while (choice != 3);
+      switch(choice){
+        case 1:
+          create(process, processCount);
+          break;
+        case 2:
+          terminate(process, processCount);
+          break;
+        case 3:
+          cout << "Exiting the program.\n";
+          break;
+        default:
+          cout << "Invalid choice. Please try again.\n";
+      }
+   }while (choice != 3);
   }
 };
