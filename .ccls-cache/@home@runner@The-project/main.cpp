@@ -2,13 +2,6 @@
 #include "theclass.h"
 using namespace std; 
 
-
-
-
-
-
-
-
 int main() 
 {  
 Displaybootup startup;
