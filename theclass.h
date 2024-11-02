@@ -9,6 +9,7 @@ struct theProcess
 string theName;
 vector<int>Cpuburst;
 vector<int>Io;
+int currentBurstIndex = 0;
 
 
 };
@@ -46,8 +47,11 @@ string password;
 
 class Processing {
 public:
-string word;
 const int maxProcesses = 10;
+string word;
+queue<theProcess> readyQueue;
+queue<theProcess> waitingQueue;
+
 void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   string processName;
   cout << "Enter the name of the process: ";
@@ -72,10 +76,7 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   }
 
 }
-queue<theProcess> readyqueue;
-readyqueue.push(N);//<- ill figure something out for this, im just waiting for the code to be done so i can get an idea on how to do it
-// What happened?
-queue<theProcess> theWaitingQueue;
+
 void terminate(string processes[], int& processCount)
 {
   string processName;
@@ -106,6 +107,51 @@ void terminate(string processes[], int& processCount)
 
 }
 
+void FCFSexecution(){
+  int cycle = 0;
+  while(!readyQueue.empty() || !waitingQueue.empty()) {
+    theWaitingQueue();
+
+    if(!readyQueue.empty()){
+      theProcess &currentProcess = readyQueue.front();
+      cout << "Cycle " << cycle << ": Running process '" << currentProcess.theName << "'\n";
+
+      currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
+      
+      if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
+        currentProcess.currentBurstIndex++;
+
+        if(currentProcess.currentBurstIndex < currentProcess.Cpuburst.size()){
+          waitingQueue.push(currentProcess);
+          readyQueue.pop();
+          
+        }else {
+          cout << "Process '" << currentProcess.theName << "' finished." << endl;
+          readyQueue.pop();
+        }
+      }
+    }
+    cycle++;
+  }
+  cout << "All processes finished." << endl;
+}
+
+void theWaitingQueue(){
+  int waitingQueueSize = waitingQueue.size();
+  for (int i=0; i<waitingQueueSize; i++){
+    theProcess &currentProcess = waitingQueue.front();
+    waitingQueue.pop();
+
+    currentProcess.Io[currentProcess.currentBurstIndex -1]--;
+
+    if(currentProcess.Io[currentProcess.currentBurstIndex -1] == 0){
+      readyQueue.push(currentProcess);
+    }else {
+      waitingQueue.push(currentProcess);
+    }
+  }
+}
+
 void managingProcesses()
   {
   string process[maxProcesses];
@@ -123,17 +169,20 @@ void managingProcesses()
 
       switch(choice){
         case 1:
-          create(process, processCount);
+          create(readyQueue, processCount, process);
           break;
         case 2:
           terminate(process, processCount);
           break;
         case 3:
+          FCFSexecution();
+        break;
+        case 4:
           cout << "Exiting the program.\n";
           break;
         default:
           cout << "Invalid choice. Please try again.\n";
       }
-   }while (choice != 3);
+   }while (choice != 4);
   }
 };
