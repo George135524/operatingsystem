@@ -1,7 +1,17 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include<vector>
+#include <queue>
 using namespace std;
+struct theProcess
+{
+string theName;
+vector<int>Cpuburst;
+vector<int>Io;
+
+
+};
 class Displaybootup
 {
 public:
@@ -38,11 +48,20 @@ class Processing {
 public:
 string word;
 const int maxProcesses = 10;
-void create(string processes[], int& processCount){
+void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   string processName;
   cout << "Enter the name of the process: ";
   cin >> processName;
-
+  //this is for creating the process
+  theProcess N= {processName,{},{}};
+  N.theName=processName;
+  int totalburst= rand() % 9 +1;
+  for (int i = 0; i < totalburst; ++i)
+  {
+    N.Cpuburst.push_back(rand() % 4 + 1); // the time of a burst 
+    N.Io.push_back(rand()% 2+1);// this represents the time of a IO burst
+  }
+  readyqueue.push(N);
   processes[processCount] = processName;
   processCount++;
   cout << "Process '" << processName << "' successfully created.\n";
@@ -53,7 +72,10 @@ void create(string processes[], int& processCount){
   }
 
 }
-
+queue<theProcess> readyqueue;
+readyqueue.push(N);//<- ill figure something out for this, im just waiting for the code to be done so i can get an idea on how to do it
+// What happened?
+queue<theProcess> theWaitingQueue;
 void terminate(string processes[], int& processCount)
 {
   string processName;

@@ -1,9 +1,16 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <vector>
-#include<queue>
+#include<vector>
 using namespace std;
+struct theProcess
+{
+string theName;
+vector<int>Cpuburst;
+
+
+
+};
 class Displaybootup
 {
 public:
