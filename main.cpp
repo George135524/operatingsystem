@@ -12,6 +12,8 @@ Displaybootup password;
 password.loginAuthentication();
 creation.managingProcesses();
 
+   creation.FCFSexecution();
+  creation.SJFexecution();
 return 0;
   
 };

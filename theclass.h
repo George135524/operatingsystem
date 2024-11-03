@@ -62,8 +62,10 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   int totalburst= rand() % 9 +1;
   for (int i = 0; i < totalburst; ++i)
   {
-    N.Cpuburst.push_back(rand() % 4 + 1); // the time of a burst 
-    N.Io.push_back(rand()% 2+1);// this represents the time of a IO burst
+    int cpuBurst = rand() % 4+1;
+    int ioBurst = rand() % 2+1;
+    N.Cpuburst.push_back(rand() % 9 + 1); // the time of a burst 
+    N.Io.push_back(rand()% 5+1);// this represents the time of a IO burst
   }
   readyqueue.push(N);
   processes[processCount] = processName;
@@ -113,22 +115,22 @@ void FCFSexecution(){
     theWaitingQueue();
 
     if(!readyQueue.empty()){
-      theProcess &currentProcess = readyQueue.front();
-      cout << "Cycle " << cycle << ": Running process '" << currentProcess.theName << "'\n";
+        theProcess currentProcess = readyQueue.front();
+        readyQueue.pop();
+        cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
+        currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
+            
+          if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
+              currentProcess.currentBurstIndex++;
 
-      currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
-      
-      if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
-        currentProcess.currentBurstIndex++;
-
-        if(currentProcess.currentBurstIndex < currentProcess.Cpuburst.size()){
-          waitingQueue.push(currentProcess);
-          readyQueue.pop();
+            if(currentProcess.currentBurstIndex < currentProcess.Io.size()){
+                waitingQueue.push(currentProcess);
+                readyQueue.pop();
+             }else {
+              cout << "Process '" << currentProcess.theName << "' finished." << endl;
+              readyQueue.push(currentProcess);
+            }
           
-        }else {
-          cout << "Process '" << currentProcess.theName << "' finished." << endl;
-          readyQueue.pop();
-        }
       }
     }
     cycle++;
@@ -136,24 +138,40 @@ void FCFSexecution(){
   cout << "All processes finished." << endl;
 }
 
-void theWaitingQueue(){
-  int waitingQueueSize = waitingQueue.size();
-  for (int i=0; i<waitingQueueSize; i++){
-    theProcess &currentProcess = waitingQueue.front();
-    waitingQueue.pop();
-
-    currentProcess.Io[currentProcess.currentBurstIndex -1]--;
-
-    if(currentProcess.Io[currentProcess.currentBurstIndex -1] == 0){
-      readyQueue.push(currentProcess);
-    }else {
-      waitingQueue.push(currentProcess);
+void SJFexecution(){
+  int cycle = 0;
+  while(!readyQueue.empty() || !waitingQueue.empty()) {
+    theProcess currentProcess = readyQueue.front();
+    readyQueue.pop();
+    
+    if(!readyQueue.empty()){
+      
     }
   }
 }
 
-void managingProcesses()
-  {
+void theWaitingQueue(){
+  int waitingQueueSize = waitingQueue.size();
+  for (int i = 0; i < waitingQueueSize; ++i){
+    theProcess currentProcess = waitingQueue.front();
+    waitingQueue.pop();
+
+    if(currentProcess.currentBurstIndex  - 1 < currentProcess.Io.size()){
+      currentProcess.Io[currentProcess.currentBurstIndex -1]--;
+    
+
+      if(currentProcess.Io[currentProcess.currentBurstIndex -1] == 0){
+        readyQueue.push(currentProcess);
+        
+      }else {
+      waitingQueue.push(currentProcess);
+      }
+    
+    }
+  }
+}
+
+void managingProcesses(){
   string process[maxProcesses];
   int processCount = 0;
   int choice;
@@ -162,7 +180,8 @@ void managingProcesses()
     cout << "\nProcess Management Menu\n";
     cout << "1. Create a process\n";
     cout << "2. Terminate a process\n";
-    cout << "3. Exit\n";
+    cout << "3. FCFS schedule\n";
+    cout << "4. Exit\n";
     cout << "Enter your choice: ";
     cin >> choice;
     
@@ -175,14 +194,18 @@ void managingProcesses()
           terminate(process, processCount);
           break;
         case 3:
+          cout<< " this will show the FCFS schedule."<<endl;
           FCFSexecution();
-        break;
+          break;
         case 4:
+          SJFexecution();
+          break;
+        case 5:
           cout << "Exiting the program.\n";
           break;
         default:
           cout << "Invalid choice. Please try again.\n";
       }
-   }while (choice != 4);
+    }while (choice != 5);
   }
 };
