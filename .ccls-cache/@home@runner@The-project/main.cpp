@@ -11,9 +11,8 @@ cout<< "Operating system is ready to be used\n";
 Displaybootup password;
 password.loginAuthentication();
 creation.managingProcesses();
-
-   creation.FCFSexecution();
-  creation.SJFexecution();
+creation.FCFSexecution();
+creation.SJFexecution();
 return 0;
   
 };

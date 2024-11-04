@@ -3,6 +3,7 @@
 #include <string>
 #include<vector>
 #include <queue>
+#include <algorithm>
 using namespace std;
 struct theProcess
 {
@@ -59,14 +60,15 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   //this is for creating the process
   theProcess N= {processName,{},{}};
   N.theName=processName;
-  int totalburst= rand() % 9 +1;
+  int totalburst= rand() % 8+1;
   for (int i = 0; i < totalburst; ++i)
   {
     int cpuBurst = rand() % 4+1;
     int ioBurst = rand() % 2+1;
-    N.Cpuburst.push_back(rand() % 9 + 1); // the time of a burst 
-    N.Io.push_back(rand()% 5+1);// this represents the time of a IO burst
+    N.Cpuburst.push_back(cpuBurst); // the time of a burst 
+    N.Io.push_back(ioBurst);// this represents the time of a IO burst
   }
+    
   readyqueue.push(N);
   processes[processCount] = processName;
   processCount++;
@@ -113,41 +115,72 @@ void FCFSexecution(){
   int cycle = 0;
   while(!readyQueue.empty() || !waitingQueue.empty()) {
     theWaitingQueue();
-
     if(!readyQueue.empty()){
         theProcess currentProcess = readyQueue.front();
         readyQueue.pop();
         cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
-        currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
-            
+        currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;  
           if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
               currentProcess.currentBurstIndex++;
-
             if(currentProcess.currentBurstIndex < currentProcess.Io.size()){
-                waitingQueue.push(currentProcess);
-                readyQueue.pop();
+              waitingQueue.push(currentProcess);  
+              //readyQueue.pop();
              }else {
               cout << "Process '" << currentProcess.theName << "' finished." << endl;
-              readyQueue.push(currentProcess);
             }
-          
+          }else{
+            readyQueue.push(currentProcess);
+        }
       }
-    }
     cycle++;
   }
   cout << "All processes finished." << endl;
 }
 
-void SJFexecution(){
+void SJFexecution(){// this will execute the code in shortest job first 
   int cycle = 0;
+ 
   while(!readyQueue.empty() || !waitingQueue.empty()) {
-    theProcess currentProcess = readyQueue.front();
-    readyQueue.pop();
-    
+    theWaitingQueue(); 
+    vector<theProcess> theVector;
+  
+    while(!readyQueue.empty()){
+      theVector.push_back(readyQueue.front());
+      readyQueue.pop();
+    }
+    sort(theVector.begin(), theVector.end(),[](const theProcess &a, const theProcess &b){
+      return a.Cpuburst[a.currentBurstIndex] < b.Cpuburst[b.currentBurstIndex];
+    });
+    for(auto &p : theVector){
+      readyQueue.push(p);
+    }
     if(!readyQueue.empty()){
+      theProcess currentProcess = readyQueue.front();
+      readyQueue.pop();
+      cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
+      currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
+      cycle++;
+      
+      if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
+         currentProcess.currentBurstIndex++;
+
+         if(currentProcess.currentBurstIndex < currentProcess.Io.size()){
+            waitingQueue.push(currentProcess);
+            cout<< "The process has been sent to wait: "<<currentProcess.theName<<endl;
+          
+          } else {
+            cout << "Process '" << currentProcess.theName << "' finished." << endl;
+          }
+      }else{
+        readyQueue.push(currentProcess);
+        
+      }
       
     }
+    
   }
+  
+  cout<< "All processes finished"<<endl;
 }
 
 void theWaitingQueue(){
@@ -158,15 +191,14 @@ void theWaitingQueue(){
 
     if(currentProcess.currentBurstIndex  - 1 < currentProcess.Io.size()){
       currentProcess.Io[currentProcess.currentBurstIndex -1]--;
-    
 
       if(currentProcess.Io[currentProcess.currentBurstIndex -1] == 0){
-        readyQueue.push(currentProcess);
-        
-      }else {
+        readyQueue.push(currentProcess);   
+      } else {
       waitingQueue.push(currentProcess);
       }
-    
+    }else{
+      cout<<"error"<<endl;
     }
   }
 }
@@ -181,7 +213,8 @@ void managingProcesses(){
     cout << "1. Create a process\n";
     cout << "2. Terminate a process\n";
     cout << "3. FCFS schedule\n";
-    cout << "4. Exit\n";
+    cout << "4. SJF schedule\n";
+    cout << "5. Exit\n";
     cout << "Enter your choice: ";
     cin >> choice;
     
@@ -205,6 +238,7 @@ void managingProcesses(){
           break;
         default:
           cout << "Invalid choice. Please try again.\n";
+          break;
       }
     }while (choice != 5);
   }
