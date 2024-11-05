@@ -60,13 +60,13 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   //this is for creating the process
   theProcess N= {processName,{},{}};
   N.theName=processName;
-  int totalburst= rand() % 8+1;
+  int totalburst= rand() % 8+1;// will determine the total number of burts
   for (int i = 0; i < totalburst; ++i)
   {
     int cpuBurst = rand() % 4+1;
     int ioBurst = rand() % 2+1;
-    N.Cpuburst.push_back(cpuBurst); // the time of a burst 
-    N.Io.push_back(ioBurst);// this represents the time of a IO burst
+    N.Cpuburst.push_back(cpuBurst); // the values that are randomly generated will be put in the cpu burst vector
+    N.Io.push_back(ioBurst);// the same as the cpu burst
   }
     
   readyqueue.push(N);
@@ -113,12 +113,13 @@ void terminate(string processes[], int& processCount)
 
 void FCFSexecution(){
   int cycle = 0;
-  while(!readyQueue.empty() || !waitingQueue.empty()) {
-    theWaitingQueue();
-    if(!readyQueue.empty()){
+  while(!readyQueue.empty() || !waitingQueue.empty()){// it will continue running as long as there is a process in either or of the queues
+    theWaitingQueue();// this is what will process the waiting queue 
+    while(!readyQueue.empty()){
         theProcess currentProcess = readyQueue.front();
-        readyQueue.pop();
+        
         cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
+        readyQueue.pop();
         currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;  
           if(currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0){
               currentProcess.currentBurstIndex++;
@@ -127,6 +128,7 @@ void FCFSexecution(){
               //readyQueue.pop();
              }else {
               cout << "Process '" << currentProcess.theName << "' finished." << endl;
+              //readyQueue.push(currentProcess);
             }
           }else{
             readyQueue.push(currentProcess);
@@ -183,9 +185,9 @@ void SJFexecution(){// this will execute the code in shortest job first
   cout<< "All processes finished"<<endl;
 }
 
-void theWaitingQueue(){
+void theWaitingQueue(){ // its something here for sure
   int waitingQueueSize = waitingQueue.size();
-  for (int i = 0; i < waitingQueueSize; ++i){
+  for (int i = 0; i < waitingQueueSize; i++){
     theProcess currentProcess = waitingQueue.front();
     waitingQueue.pop();
 
