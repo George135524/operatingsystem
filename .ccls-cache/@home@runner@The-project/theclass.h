@@ -7,14 +7,21 @@
 #include <limits>
 using namespace std;
 
-struct theProcess{
+struct Ptable{
+int virtual_memory;
+int physical_memory;
+
+};
+struct theProcess {
   string theName;
   vector<int>Cpuburst;
   vector<int>Io;
   int currentBurstIndex = 0;
+  vector<Ptable>pageT;
+
 };
 
-class Displaybootup{
+class Displaybootup {
 public:
 
 void startingUp(){
@@ -61,18 +68,42 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   cin >> processName;
   //this is for creating the process
   theProcess N = {processName,{},{}};
-  int totalburst= (processCount + 1) % 8 + 1;// will determine the total number of burts
+  int totalburst= (processCount + 1) % 8 + 1;// will determine the total number of bursts
   for (int i = 0; i < totalburst; ++i)
   {
     N.Cpuburst.push_back((processCount + i + 2) % 4 + 1); // the values that are randomly generated will be put in the cpu burst vector
     N.Io.push_back((processCount + i + 3) % 2 + 1);// the same as the cpu burst
   }
+    int pages = 5;
+    for(int i=0;i<pages;i++){
+        Ptable entry = {i,(processCount+i) % 8};
+        N.pageT.push_back(entry);
+        
+    }
     
   readyqueue.push(N);
   processes[processCount] = processName;
+  processCount++;
   cout << "Process '" << processName << "' successfully created.\n";
 }
 
+int translateAddress(int virtualAddress,const vector<Ptable>&pageT,int pageS){
+    int pageN = virtualAddress/pageS;
+    int offset = virtualAddress % pageS;
+
+    for (const auto& entry : pageT){
+        if (entry.virtual_memory == pageN){
+            int physicalFrame = entry.physical_memory;
+            int physicalAddress = (physicalFrame * pageS) + offset;
+            cout << "Translated virtual address " << virtualAddress << " , Page: " << pageN << ", Offset: " << offset << ", Physical address: " << physicalAddress << endl;
+            return physicalAddress;
+        }
+    }
+    cout << "Page fault: Virtual Page " << pageN << " not found int the page table. \n";
+    return -1;
+}
+
+// this to terminate process
 void terminate(queue<theProcess>& readyQueue, queue<theProcess>& waitingQueue, string processes[], int& processCount){
   string processName;
   cout << "Enter the name of the process to terminate: ";
@@ -98,19 +129,25 @@ void terminate(queue<theProcess>& readyQueue, queue<theProcess>& waitingQueue, s
     cout << "Process '" << processName << "' successfully terminated.\n";
   }
 }
-
-void FCFSexecution() {
+// this to do the FCFs execution
+void FCFSexecution(){
   int cycle = 0;
+   int pageS=4096;
   while(!readyQueue.empty() || !waitingQueue.empty()) {
       theWaitingQueue(); 
 
       if(!readyQueue.empty()) {
           theProcess currentProcess = readyQueue.front();
           readyQueue.pop();
-
           cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
 
           if (currentProcess.currentBurstIndex < currentProcess.Cpuburst.size()) {
+             
+              int virtual_address = rand()% 9000;
+              int physicalAddress = translateAddress(virtual_address,currentProcess.pageT,pageS);
+              if(physicalAddress!=-1){
+              cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl;
+              }
               currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;  
               if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
                   currentProcess.currentBurstIndex++;
@@ -128,9 +165,10 @@ void FCFSexecution() {
   }
   cout << "All processes finished." << endl;
 }
-
+//this is for the SJF execution 
 void SJFexecution() {
   int cycle = 0;
+    int pageS= 4096;
   while(!readyQueue.empty() || !waitingQueue.empty()) {
       theWaitingQueue(); 
 
@@ -157,6 +195,11 @@ void SJFexecution() {
           if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
               currentProcess.currentBurstIndex++;
               if(currentProcess.currentBurstIndex < currentProcess.Io.size()) {
+                    int virtual_address = rand()% 9000;
+                    int physicalAddress = translateAddress(virtual_address,currentProcess.pageT,pageS);
+                    if(physicalAddress!=-1){
+                    cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl;
+                    }
                   waitingQueue.push(currentProcess);  
               } else {
                   cout << "Process '" << currentProcess.theName << "' finished." << endl;
@@ -170,7 +213,7 @@ void SJFexecution() {
   cout << "All processes finished." << endl;
 }
 
-
+//waiting queue 
 void theWaitingQueue(){ 
   int waitingQueueSize = waitingQueue.size();
 
