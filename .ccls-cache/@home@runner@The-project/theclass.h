@@ -139,14 +139,14 @@ void FCFSexecution(){
       if(!readyQueue.empty()) {
           theProcess currentProcess = readyQueue.front();
           readyQueue.pop();
-          cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
+          cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl << endl;
 
           if (currentProcess.currentBurstIndex < currentProcess.Cpuburst.size()) {
              
               int virtual_address = rand()% 9000;
               int physicalAddress = translateAddress(virtual_address,currentProcess.pageT,pageS);
               if(physicalAddress!=-1){
-              cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl;
+              cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl << endl;
               }
               currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;  
               if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
@@ -154,7 +154,7 @@ void FCFSexecution(){
                   if(currentProcess.currentBurstIndex < currentProcess.Io.size()) {
                       waitingQueue.push(currentProcess);  
                   } else {
-                      cout << "Process '" << currentProcess.theName << "' finished." << endl;  
+                      cout << "\nProcess '" << currentProcess.theName << "' finished." << endl;  
                   }
               } else {
                   readyQueue.push(currentProcess);  
@@ -163,7 +163,7 @@ void FCFSexecution(){
       }
       cycle++;
   }
-  cout << "All processes finished." << endl;
+  cout << "\nAll processes finished."  << endl;
 }
 //this is for the SJF execution 
 void SJFexecution() {
@@ -189,7 +189,7 @@ void SJFexecution() {
           theProcess currentProcess = readyQueue.front();
           readyQueue.pop();
 
-          cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl;
+          cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl << endl;
           currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
 
           if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
@@ -198,11 +198,11 @@ void SJFexecution() {
                     int virtual_address = rand()% 9000;
                     int physicalAddress = translateAddress(virtual_address,currentProcess.pageT,pageS);
                     if(physicalAddress!=-1){
-                    cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl;
+                    cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl << endl;
                     }
                   waitingQueue.push(currentProcess);  
               } else {
-                  cout << "Process '" << currentProcess.theName << "' finished." << endl;
+                  cout << "\nProcess '" << currentProcess.theName << "' finished." << endl;
               }
           } else {
               readyQueue.push(currentProcess); 
@@ -210,7 +210,7 @@ void SJFexecution() {
       }
       cycle++;
   }
-  cout << "All processes finished." << endl;
+  cout << "\nAll processes finished." << endl;
 }
 
 //waiting queue 
@@ -262,15 +262,15 @@ void managingProcesses(int& processCount){
           terminate(readyQueue, waitingQueue, processes, processCount);
           break;
         case 3:
-          cout<< "FCFS schedule is running: "<<endl;
+          cout<< "\nFCFS schedule is running: \n" << endl;
           FCFSexecution();
           break;
         case 4:
-          cout<< "SJF schedule is running: "<<endl;
+          cout<< "\nSJF schedule is running: \n" << endl;
           SJFexecution();
           break;
         case 5:
-          cout << "Exiting the program.\n";
+          cout << "\nExiting the program.\n";
           break;
         default:
           cout << "Invalid choice. Please try again.\n";
