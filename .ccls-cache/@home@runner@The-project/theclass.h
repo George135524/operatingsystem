@@ -7,11 +7,13 @@
 #include <limits>
 using namespace std;
 
+//page table
 struct Ptable{
 int virtual_memory;
 int physical_memory;
 
 };
+
 struct theProcess {
   string theName;
   vector<int>Cpuburst;
@@ -25,7 +27,7 @@ class Displaybootup {
 public:
 
 void startingUp(){
-  
+  // Simulates the booting up of the computer
   cout<<"Setting up hardware" <<endl;
   cout<< "preparing bootloader"<<endl;
   cout<< "Setting up Bios"<<endl;
@@ -39,24 +41,24 @@ string password;
    do{
      cout<<"Enter the password"<<endl;
      cin>> password;
-     if(password !="yes23"){
+     if(password !="yes23"){ // hardcoded password for this simulator
         cout<< "access denied try again"<<endl; 
      }else{
         cout<<"Welcome back user"<<endl;
      }
-    }while(password != "yes23");
+    }while(password != "yes23"); // repeated until correct password is entered
   }
 };
 
 
-
+// This is the class to manage and schedule the processes
 class Processing {
 public:
-const int maxProcesses = 10;
-//string word;
+const int maxProcesses = 10; // maximum processes allowed
 queue<theProcess> readyQueue;
 queue<theProcess> waitingQueue;
 
+// Function to add a process to the ready queue
 void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
   if (processCount >= maxProcesses) {
     cout << "Maximum number of processes reached." << endl;
@@ -80,13 +82,15 @@ void create(queue<theProcess>& readyqueue,int& processCount,string processes[]){
         N.pageT.push_back(entry);
         
     }
-    
+
+    // Add the process to the ready queue
   readyqueue.push(N);
   processes[processCount] = processName;
   processCount++;
   cout << "Process '" << processName << "' successfully created.\n";
 }
 
+// This section maps a virtual address to a physical address
 int translateAddress(int virtualAddress,const vector<Ptable>&pageT,int pageS){
     int pageN = virtualAddress/pageS;
     int offset = virtualAddress % pageS;
@@ -100,18 +104,19 @@ int translateAddress(int virtualAddress,const vector<Ptable>&pageT,int pageS){
         }
     }
     cout << "Page fault: Virtual Page " << pageN << " not found int the page table. \n";
-    return -1;
+    return -1; // returns -1 for page fault
 }
 
-// this to terminate process
+// this to terminate process and safely removes them
 void terminate(queue<theProcess>& readyQueue, queue<theProcess>& waitingQueue, string processes[], int& processCount){
   string processName;
   cout << "Enter the name of the process to terminate: ";
   cin >> processName;
 
+    // Removes the process from the ready queue and waiting queue
   removeProcessFromQueue(readyQueue, processName);
   removeProcessFromQueue(waitingQueue, processName);
-  
+
   int processIndex = -1;
   for (int i = 0; i < processCount; i++){
     if (processes[i] == processName){
@@ -134,7 +139,7 @@ void FCFSexecution(){
   int cycle = 0;
    int pageS=4096;
   while(!readyQueue.empty() || !waitingQueue.empty()) {
-      theWaitingQueue(); 
+      theWaitingQueue(); // This will process anyy I/O waiting task
 
       if(!readyQueue.empty()) {
           theProcess currentProcess = readyQueue.front();
@@ -142,12 +147,14 @@ void FCFSexecution(){
           cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl << endl;
 
           if (currentProcess.currentBurstIndex < currentProcess.Cpuburst.size()) {
-             
+
+              // Simulates the virtual to physical address translation
               int virtual_address = rand()% 9000;
               int physicalAddress = translateAddress(virtual_address,currentProcess.pageT,pageS);
               if(physicalAddress!=-1){
               cout<< "The Vitural address should be ' "<< virtual_address<< " ' then it translates to: "<< physicalAddress << endl << endl;
               }
+              // This processes the current CPU burst
               currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;  
               if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
                   currentProcess.currentBurstIndex++;
@@ -157,7 +164,7 @@ void FCFSexecution(){
                       cout << "\nProcess '" << currentProcess.theName << "' finished." << endl;  
                   }
               } else {
-                  readyQueue.push(currentProcess);  
+                  readyQueue.push(currentProcess); // Re-queues the process for the next burst  
               }
           }
       }
@@ -170,7 +177,7 @@ void SJFexecution() {
   int cycle = 0;
     int pageS= 4096;
   while(!readyQueue.empty() || !waitingQueue.empty()) {
-      theWaitingQueue(); 
+      theWaitingQueue(); // This will process anyy I/O waiting task
 
       vector<theProcess> theVector;
       while(!readyQueue.empty()) {
@@ -190,8 +197,8 @@ void SJFexecution() {
           readyQueue.pop();
 
           cout << "Cycle '" << cycle << "' Process '" << currentProcess.theName << "' is running." << endl << endl;
+           // This processes the current CPU burst
           currentProcess.Cpuburst[currentProcess.currentBurstIndex]--;
-
           if (currentProcess.Cpuburst[currentProcess.currentBurstIndex] == 0) {
               currentProcess.currentBurstIndex++;
               if(currentProcess.currentBurstIndex < currentProcess.Io.size()) {
@@ -205,7 +212,7 @@ void SJFexecution() {
                   cout << "\nProcess '" << currentProcess.theName << "' finished." << endl;
               }
           } else {
-              readyQueue.push(currentProcess); 
+              readyQueue.push(currentProcess); // Re-queues the process for the next burst
           }
       }
       cycle++;
@@ -224,7 +231,7 @@ void theWaitingQueue(){
         if (currentProcess.currentBurstIndex < currentProcess.Io.size()) {
             currentProcess.Io[currentProcess.currentBurstIndex]--;
             if (currentProcess.Io[currentProcess.currentBurstIndex] == 0) {
-                readyQueue.push(currentProcess);
+                readyQueue.push(currentProcess); // Moves back to ready queue after I/O completion
             } else {
                 waitingQueue.push(currentProcess);
             }
